@@ -71,6 +71,8 @@ input{font:inherit}
 .hero-in{display:grid;grid-template-columns:minmax(0,1fr) 460px;gap:40px;align-items:center}
 .kicker{font-size:11.5px;letter-spacing:.34em;color:#6b7791;font-weight:700;text-transform:uppercase}
 .hero h1{margin:16px 0 14px;font-size:clamp(38px,5.6vw,72px);line-height:.98;font-weight:900;letter-spacing:-2px}
+.hero h1 .cn{-webkit-text-stroke:2.2px currentColor;letter-spacing:2px}
+@media (max-width:640px){.hero h1 .cn{-webkit-text-stroke:1.4px currentColor;letter-spacing:1px}}
 .hero h1 .g{font-style:italic;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 26px rgba(150,80,255,.35))}
 .hero-sub{font-size:17px;font-weight:800;color:#dbe4f6}
 .hero-caps{margin-top:9px;font-size:10.5px;letter-spacing:.24em;color:#5f6b85;font-weight:700;overflow-wrap:anywhere}
@@ -477,10 +479,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
   <header class="hero">
     <div class="wrap hero-in">
       <div>
-        <div class="kicker">THE BEST LOCAL MUSIC PLATFORM</div>
-        <h1>你的曲库<br><span class="g">UNLIMITED</span></h1>
-        <div class="hero-sub">高品质音源 &middot; 完全离线 &middot; 无需账号</div>
-        <div class="hero-caps">LOCAL FILES <i>|</i> ID3 ARTWORK <i>|</i> NOTHING UPLOADED</div>
+        <h1><span class="cn">你的曲库</span><br><span class="g">UNLIMITED</span></h1>
         <label class="searchbar">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="#6b7994"><path d="M10 2a8 8 0 105 14.3l5.3 5.4 1.4-1.4-5.4-5.3A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/></svg>
           <input id="search" type="search" placeholder="搜索歌曲 / 歌手 / 专辑 ..." autocomplete="off">
@@ -538,7 +537,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
       <div class="panel">
         <div class="sec-kicker">YOUR LIBRARY</div>
         <h3>一切都在这台电脑上</h3>
-        <p>文件不会离开你的电脑。封面、歌手和专辑都直接读取自每个文件的 ID3 标签。</p>
         <div class="boxes">
           <div class="box"><b id="stCount">0</b><span>首歌曲</span></div>
           <div class="box"><b id="stTime">0分钟</b><span>总时长</span></div>
@@ -549,7 +547,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
       <div class="panel b">
         <div class="sec-kicker">SHORTCUTS</div>
         <h3>用键盘操作</h3>
-        <p>按住封面上的手柄拖动即可排序 &mdash;&mdash; 这个顺序就是<b>「全部 · 自定顺序」</b>视图。</p>
         <div class="keys">
           <div><kbd>空格</kbd> 播放 / 暂停</div><div><kbd>N</kbd> <kbd>P</kbd> 下一首 / 上一首</div>
           <div><kbd>&larr;</kbd> <kbd>&rarr;</kbd> 快进 10 秒</div><div><kbd>&uarr;</kbd> <kbd>&darr;</kbd> 音量</div>
@@ -568,7 +565,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
     <div class="page-head band">
       <div class="sec-kicker">NEW RELEASES</div>
       <h1>最新<span class="g">上架</span></h1>
-      <p class="page-sub">按添加时间排序，最新的一首放在最上面。</p>
     </div>
     <div id="latestFeature"></div>
     <div class="sec"><div class="grid" id="latestGrid"></div></div>
@@ -581,7 +577,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
     <div class="page-head band">
       <div class="sec-kicker">TOP PLAYED</div>
       <h1>热门<span class="g">榜单</span></h1>
-      <p class="page-sub">根据你实际的播放次数排名 &mdash;&mdash; 只统计在这台电脑上，不会上传到任何地方。</p>
       <div class="page-actions">
         <button class="pill pill-purple" id="chartPlay" style="padding:0 22px">播放前十首</button>
         <button class="pill pill-ghost" id="chartShuffle" style="padding:0 22px">随机播放榜单</button>
@@ -598,7 +593,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
     <div class="page-head band">
       <div class="sec-kicker">EVERYONE IN YOUR LIBRARY</div>
       <h1>全部<span class="g">音乐人</span></h1>
-      <p class="page-sub">根据每个文件的 ID3 歌手标签分组。点击任意一位，查看他的全部歌曲。</p>
     </div>
     <div class="artists" id="artistGrid"></div>
   </div>
@@ -630,7 +624,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
     <div class="page-head band">
       <div class="sec-kicker">HEARTED</div>
       <h1>我的<span class="g">收藏</span></h1>
-      <p class="page-sub">所有点过红心的歌曲。再点一次红心即可移出收藏。</p>
       <div class="page-actions">
         <button class="pill pill-purple" id="favPlay" style="padding:0 22px">播放收藏</button>
         <button class="pill pill-ghost" id="favShuffle" style="padding:0 22px">随机播放收藏</button>
@@ -646,15 +639,11 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
     <div class="page-head band">
       <div class="sec-kicker">ABOUT</div>
       <h1>911<span class="g">.COM</span></h1>
-      <p class="page-sub">一个只有一个 HTML 文件的音乐播放器。它在你自己的电脑上运行，读取你自己的文件，
-        不与互联网通信 &mdash;&mdash; 没有账号，不同步，无遥测，完全没有任何网络请求。</p>
     </div>
     <div class="panels" style="margin-top:0">
       <div class="panel">
         <div class="sec-kicker">HOW IT WORKS</div>
         <h3>就地读取你的文件</h3>
-        <p>添加歌曲时，文件会保存在这台电脑上、这个浏览器自己的数据库里。播放器读取 ID3 标签得到标题、歌手、
-          专辑和封面，并通过解码音频得出时长。</p>
         <div class="checks">
           <div><i>&#10003;</i> 不会上传任何内容</div><div><i>&#10003;</i> 无需联网即可使用</div>
           <div><i>&#10003;</i> 读取内嵌封面</div><div><i>&#10003;</i> 播放次数与收藏</div>
@@ -664,7 +653,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
       <div class="panel c">
         <div class="sec-kicker">FORMATS &amp; STORAGE</div>
         <h3>支持哪些格式</h3>
-        <p>浏览器能解码的都可以播放。封面与标签读取自 MP3 的 ID3v2 帧。</p>
         <div class="boxes" style="grid-template-columns:repeat(3,minmax(0,1fr))">
           <div class="box"><b>7</b><span>种格式</span></div>
           <div class="box"><b id="aboutCount">0</b><span>曲库歌曲</span></div>
@@ -692,7 +680,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
       <div class="panel">
         <div class="sec-kicker">DANGER ZONE</div>
         <h3>重新开始</h3>
-        <p>从这个浏览器的曲库中移除全部歌曲。硬盘上的原始文件不会被这个播放器改动 &mdash;&mdash; 只清除它自己保存的副本。</p>
         <button class="pill pill-ghost" id="btnClear" style="height:40px;padding:0 22px">清空曲库</button>
       </div>
     </div>
