@@ -1,8 +1,9 @@
-import { json, readIndex, writeIndex, safeExt, newId, EXT_OK } from '../_lib.js';
+import { json, readIndex, writeIndex, safeExt, newId, EXT_OK, hasStore, noStore } from '../_lib.js';
 
 const MAX_BYTES = 60 * 1024 * 1024;   // one song; R2 free tier is 10 GB total
 
 export async function onRequestPost({ request, env }) {
+  if (!hasStore(env)) return noStore();
   let form;
   try { form = await request.formData(); }
   catch { return json({ error: 'expected multipart/form-data' }, 400); }

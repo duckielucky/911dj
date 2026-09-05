@@ -2,12 +2,13 @@
 // that as N separate requests would race: each one reads index.json, mutates its own
 // copy and writes it back, so all but the last write are lost. One request, one
 // read-modify-write, no lost updates.
-import { json, readIndex, writeIndex } from '../_lib.js';
+import { json, readIndex, writeIndex, hasStore, noStore } from '../_lib.js';
 
 const FIELDS = ['title', 'artist', 'album', 'order', 'plays', 'liked', 'duration'];
 const MAX = 2000;
 
 export async function onRequestPatch({ request, env }) {
+  if (!hasStore(env)) return noStore();
   let body;
   try { body = await request.json(); } catch { return json({ error: 'bad json' }, 400); }
 

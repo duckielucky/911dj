@@ -3,6 +3,7 @@
 const ALLOWED = /^(audio|cover)\//;
 
 export async function onRequestGet({ params, request, env }) {
+  if (!env || !env.MEDIA) return new Response('Storage not configured', { status: 503 });
   const key = Array.isArray(params.path) ? params.path.join('/') : String(params.path || '');
   if (!ALLOWED.test(key)) return new Response('Not found', { status: 404 });
 

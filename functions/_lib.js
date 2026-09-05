@@ -57,6 +57,10 @@ export async function sameSecret(a, b) {
   return diff === 0;
 }
 
+/* ---- storage may not be bound yet (no R2 bucket configured) ---- */
+export const hasStore = env => !!(env && env.MEDIA);
+export const noStore = () => json({ error: 'storage-not-configured' }, 503);
+
 /* ---- the track index lives as one JSON object in R2 ---- */
 const INDEX_KEY = 'index.json';
 export async function readIndex(env) {

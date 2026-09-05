@@ -1,8 +1,9 @@
-import { json, readIndex, writeIndex } from '../../_lib.js';
+import { json, readIndex, writeIndex, hasStore, noStore } from '../../_lib.js';
 
 const FIELDS = ['title', 'artist', 'album', 'order', 'plays', 'liked', 'duration'];
 
 export async function onRequestPatch({ params, request, env }) {
+  if (!hasStore(env)) return noStore();
   const list = await readIndex(env);
   const t = list.find(x => x.id === params.id);
   if (!t) return json({ error: 'not found' }, 404);
@@ -21,6 +22,7 @@ export async function onRequestPatch({ params, request, env }) {
 }
 
 export async function onRequestDelete({ params, env }) {
+  if (!hasStore(env)) return noStore();
   const list = await readIndex(env);
   const i = list.findIndex(x => x.id === params.id);
   if (i < 0) return json({ error: 'not found' }, 404);
