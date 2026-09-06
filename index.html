@@ -261,6 +261,13 @@ body.playing .eq i{animation-play-state:running}
 .checks div{font-size:13px;color:#b3bdd0;display:flex;align-items:center;gap:9px}
 .checks i{font-style:normal;color:#7c5cff;font-weight:900}
 
+.pwform{display:grid;gap:12px;margin-bottom:18px}
+.pwform label{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#6b7690;font-weight:800;margin-bottom:7px}
+.pwform input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--line-2);border-radius:9px;color:#fff;padding:11px 12px;font-size:14px;outline:none}
+.pwform input:focus{border-color:rgba(150,110,255,.6)}
+.pwmsg{font-size:13px;min-height:19px;margin-bottom:4px}
+.pwmsg.ok{color:#4ade80}
+.pwmsg.err{color:#ff7d97}
 .empty{grid-column:1/-1;text-align:center;padding:70px 20px;border-radius:16px;border:1px dashed var(--line-2);background:rgba(255,255,255,.015)}
 .empty h3{margin:16px 0 8px;font-size:22px}
 .empty p{margin:0 auto 22px;max-width:440px;color:var(--muted);font-size:14px;line-height:1.65}
@@ -665,6 +672,28 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
         </div>
       </div>
     </div>
+    <div class="panels" id="pwPanels" hidden>
+      <div class="panel c">
+        <div class="sec-kicker">ACCESS</div>
+        <h3>修改访问密码</h3>
+        <div class="pwform">
+          <div><label for="pwCur">当前密码</label><input id="pwCur" type="password" autocomplete="current-password"></div>
+          <div><label for="pwNew">新密码</label><input id="pwNew" type="password" autocomplete="new-password"></div>
+          <div><label for="pwNew2">再输入一次</label><input id="pwNew2" type="password" autocomplete="new-password"></div>
+        </div>
+        <div class="pwmsg" id="pwMsg"></div>
+        <button class="pill pill-purple" id="pwSave" style="height:40px;padding:0 22px">保存新密码</button>
+      </div>
+      <div class="panel">
+        <div class="sec-kicker">NOTE</div>
+        <h3>改密码之后</h3>
+        <div class="checks">
+          <div><i>&#10003;</i> 这台设备保持登录</div><div><i>&#10003;</i> 其他设备全部退出</div>
+          <div><i>&#10003;</i> 新密码至少 6 位</div><div><i>&#10003;</i> 只保存加密后的哈希</div>
+        </div>
+      </div>
+    </div>
+
     <div class="panels">
       <div class="panel b">
         <div class="sec-kicker">EVERY KEY</div>
@@ -1490,6 +1519,32 @@ $('#fileInput').onchange = e => { addFiles(e.target.files); e.target.value = '';
 $('#dirInput').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
 $('#btnClear').onclick = clearAll;
 addEventListener('pagehide', () => { if(Store.mode === 'server' && dirty.size) flushMeta(); });
+$('#pwSave').onclick = async () => {
+  const cur = $('#pwCur').value, a = $('#pwNew').value, b = $('#pwNew2').value;
+  const msg = $('#pwMsg');
+  const say = (t, cls) => { msg.textContent = t; msg.className = 'pwmsg ' + cls; };
+  if(!cur || !a){ say('请填写当前密码和新密码', 'err'); return; }
+  if(a !== b){ say('两次输入的新密码不一致', 'err'); return; }
+  if(a.length < 6){ say('新密码至少 6 位', 'err'); return; }
+  $('#pwSave').disabled = true; say('正在保存…', '');
+  try {
+    const r = await fetch('api/password', {
+      method:'POST', headers:{ 'content-type':'application/json' },
+      credentials:'same-origin', body: JSON.stringify({ current: cur, next: a })
+    });
+    const d = await r.json().catch(() => ({}));
+    if(r.ok){
+      say(d.message || '密码已更新', 'ok');
+      $('#pwCur').value = $('#pwNew').value = $('#pwNew2').value = '';
+      toast('密码已更新');
+    } else say(d.message || '保存失败（' + r.status + '）', 'err');
+  } catch(e){ say('网络错误，请重试', 'err'); }
+  $('#pwSave').disabled = false;
+};
+$$('#pwCur, #pwNew, #pwNew2').forEach(el => el.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); $('#pwSave').click(); }
+}));
+
 $('#btnLogout').onclick = async () => {
   if(!confirm('退出登录？')) return;
   await settled();
@@ -1816,6 +1871,7 @@ window.addEventListener('drop', async e => {
     state.tracks = Store.booted || [];
     state.persist = true;
     $('#btnLogout').hidden = false;
+    $('#pwPanels').hidden = false;
   } else try {
     const recs = await DB.all();
     let metas = [];

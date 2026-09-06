@@ -1,4 +1,4 @@
-import { json, makeToken, sameSecret, SESSION } from '../_lib.js';
+import { json, makeToken, checkPassword, authEpoch, SESSION } from '../_lib.js';
 
 // Small in-memory throttle. Isolates are short-lived, so this only blunts bursts.
 const hits = new Map();
@@ -12,9 +12,9 @@ export async function onRequestPost({ request, env }) {
   let password = '';
   try { ({ password } = await request.json()); } catch { /* empty body */ }
 
-  if (await sameSecret(password, env.SITE_PASSWORD)) {
+  if (await checkPassword(env, password)) {
     hits.delete(ip);
-    const token = await makeToken(env.SESSION_SECRET, 30);
+    const token = await makeToken(env.SESSION_SECRET, await authEpoch(env), 30);
     return json({ ok: true }, 200, {
       'set-cookie': `${SESSION}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 86400}`
     });

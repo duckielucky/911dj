@@ -19,20 +19,23 @@ const unb64url = s => {
 const hmacKey = (secret, use) =>
   crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [use]);
 
-/* ---- session cookie: "<expiry>.<hmac(expiry)>" ---- */
-export async function makeToken(secret, days = 30) {
-  const exp = String(Date.now() + days * 86400000);
-  const sig = await crypto.subtle.sign('HMAC', await hmacKey(secret, 'sign'), enc.encode(exp));
-  return exp + '.' + b64url(sig);
+/* ---- session cookie: "<expiry>.<epoch>.<hmac>" ----
+   The epoch is bumped whenever the password changes, which invalidates every
+   cookie issued under the old one. ---- */
+export async function makeToken(secret, epoch, days = 30) {
+  const payload = String(Date.now() + days * 86400000) + '.' + String(epoch || 0);
+  const sig = await crypto.subtle.sign('HMAC', await hmacKey(secret, 'sign'), enc.encode(payload));
+  return payload + '.' + b64url(sig);
 }
-export async function validToken(token, secret) {
+export async function validToken(token, secret, epoch) {
   if (!token) return false;
-  const dot = token.lastIndexOf('.');
-  if (dot < 1) return false;
-  const exp = token.slice(0, dot), sig = token.slice(dot + 1);
+  const parts = String(token).split('.');
+  if (parts.length !== 3) return false;
+  const [exp, ep, sig] = parts;
   if (!/^\d+$/.test(exp) || Number(exp) < Date.now()) return false;
+  if (String(ep) !== String(epoch || 0)) return false;
   try {
-    return await crypto.subtle.verify('HMAC', await hmacKey(secret, 'verify'), unb64url(sig), enc.encode(exp));
+    return await crypto.subtle.verify('HMAC', await hmacKey(secret, 'verify'), unb64url(sig), enc.encode(exp + '.' + ep));
   } catch { return false; }
 }
 export function cookie(request, name) {
@@ -55,6 +58,44 @@ export async function sameSecret(a, b) {
   let diff = 0;
   for (let i = 0; i < u.length; i++) diff |= u[i] ^ v[i];
   return diff === 0;
+}
+
+/* ---- the live password lives in KV; SITE_PASSWORD is only the initial one ----
+   Cached per isolate for a minute so the gate does not read KV on every asset. */
+const AUTH_KEY = 'auth';
+let authCache = null, authAt = 0;
+export async function getAuth(env) {
+  const now = Date.now();
+  if (authCache !== null && now - authAt < 60000) return authCache;
+  let v = null;
+  try { if (env.CONFIG) v = await env.CONFIG.get(AUTH_KEY, 'json'); } catch { v = null; }
+  authCache = v; authAt = now;
+  return v;
+}
+export async function setAuth(env, obj) {
+  if (!env.CONFIG) throw new Error('no-kv');
+  await env.CONFIG.put(AUTH_KEY, JSON.stringify(obj));
+  authCache = obj; authAt = Date.now();
+}
+export async function authEpoch(env) {
+  const a = await getAuth(env);
+  return (a && a.epoch) || 0;
+}
+export const randHex = (n = 16) => {
+  const a = new Uint8Array(n); crypto.getRandomValues(a);
+  return Array.from(a).map(b => b.toString(16).padStart(2, '0')).join('');
+};
+export async function hashPw(pw, salt) {
+  const key = await crypto.subtle.importKey('raw', enc.encode(String(pw)), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: enc.encode(String(salt)), iterations: 100000, hash: 'SHA-256' }, key, 256);
+  return b64url(bits);
+}
+/* Checks the KV password when one has been set, otherwise the deploy-time one. */
+export async function checkPassword(env, pw) {
+  const a = await getAuth(env);
+  if (a && a.hash && a.salt) return sameSecret(await hashPw(pw, a.salt), a.hash);
+  return sameSecret(pw, env.SITE_PASSWORD);
 }
 
 /* ---- storage may not be bound yet (no R2 bucket configured) ---- */

@@ -1,5 +1,5 @@
 // Gates the entire site. Nothing — page, audio or API — is reachable without the password.
-import { validToken, cookie, SESSION } from './_lib.js';
+import { validToken, cookie, SESSION, authEpoch } from './_lib.js';
 
 const OPEN_PATHS = new Set(['/api/login']);
 
@@ -15,7 +15,7 @@ export async function onRequest(context) {
   }
   if (OPEN_PATHS.has(url.pathname)) return next();
 
-  const ok = await validToken(cookie(request, SESSION), env.SESSION_SECRET);
+  const ok = await validToken(cookie(request, SESSION), env.SESSION_SECRET, await authEpoch(env));
   if (ok) {
     const res = await next();
     const out = new Response(res.body, res);
