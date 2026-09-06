@@ -2477,6 +2477,39 @@ $('#pickList').addEventListener('click', e => {
   if(t) deckLoad(id, t.url, t.title);
 });
 
+/* ---- Songs added before the server had storage sit in this browser's own
+   database. Offer to lift them up rather than stranding them. ---- */
+async function migrateLocal(){
+  if(Store.mode !== 'server') return;
+  let recs = [];
+  try { recs = await DB.all(); } catch(e){ return; }
+  const local = recs.filter(r => r && r.blob);
+  if(!local.length) return;
+
+  const have = new Set(state.tracks.map(t => (t.title + '|' + t.fileName).toLowerCase()));
+  const todo = local.filter(r => !have.has(((r.title || '') + '|' + (r.fileName || '')).toLowerCase()));
+  if(!todo.length) return;
+
+  if(!confirm('这台设备本地还存着 ' + todo.length + ' 首歌（是服务器存储启用前上传的）。\n\n要现在上传到服务器吗？上传后所有设备都能听到。')) return;
+
+  let ok = 0, fail = 0;
+  toast('正在上传 ' + todo.length + ' 首…');
+  for(const r of todo){
+    try {
+      const file = new File([r.blob], r.fileName || ((r.title || 'song') + '.mp3'), { type: r.blob.type || 'audio/mpeg' });
+      const t = await Store.upload(file, r.art || null, {
+        title: r.title, artist: r.artist, album: r.album, duration: r.duration, fileName: r.fileName
+      });
+      state.tracks.push(t);
+      try { await DB.del(r.id); await DB.delMeta(r.id); } catch(e){}
+      ok++;
+    } catch(e){ fail++; }
+    renderPage();
+  }
+  renderPage();
+  toast(fail ? ('已上传 ' + ok + ' 首，' + fail + ' 首失败') : ('已上传 ' + ok + ' 首，现在所有设备都能听到'));
+}
+
 /* ------------------------------------------------------------------- boot */
 (async function boot(){
   const startPage = loadSettings();
@@ -2504,6 +2537,7 @@ $('#pickList').addEventListener('click', e => {
     });
   } catch(e){ state.persist = false; }
   updateStore();
+  if(Store.mode === 'server') setTimeout(migrateLocal, 1500);
   $$('.page').forEach(p => { p.hidden = p.id !== 'pg-' + startPage; });
   $$('#navLinks button').forEach(b => b.classList.toggle('on', b.getAttribute('data-page') === startPage));
   state.page = startPage;
