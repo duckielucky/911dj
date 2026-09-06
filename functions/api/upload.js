@@ -1,6 +1,6 @@
-import { json, readIndex, writeIndex, safeExt, newId, EXT_OK, hasStore, noStore } from '../_lib.js';
+import { json, readIndex, writeIndex, safeExt, newId, EXT_OK, hasStore, noStore, putBlob, useR2, KV_MAX } from '../_lib.js';
 
-const MAX_BYTES = 60 * 1024 * 1024;   // one song; R2 free tier is 10 GB total
+const MAX_BYTES = 60 * 1024 * 1024;   // one song
 
 export async function onRequestPost({ request, env }) {
   if (!hasStore(env)) return noStore();
@@ -10,7 +10,11 @@ export async function onRequestPost({ request, env }) {
 
   const file = form.get('file');
   if (!file || typeof file === 'string') return json({ error: 'no file' }, 400);
-  if (file.size > MAX_BYTES) return json({ error: 'file too large', max: MAX_BYTES }, 413);
+  const cap = useR2(env) ? MAX_BYTES : KV_MAX;
+  if (file.size > cap) return json({
+    error: 'file too large', max: cap,
+    message: useR2(env) ? '文件超过 60 MB' : '未启用 R2 时单曲上限 24 MB，请换更小的文件或开启 R2'
+  }, 413);
 
   const isAudio = (file.type && file.type.startsWith('audio')) || EXT_OK.test(file.name || '');
   if (!isAudio) return json({ error: 'not an audio file' }, 415);
@@ -22,17 +26,14 @@ export async function onRequestPost({ request, env }) {
   const ext = safeExt(file.name || meta.fileName);
   const mediaKey = `audio/${id}${ext}`;
 
-  await env.MEDIA.put(mediaKey, file.stream(), {
-    httpMetadata: { contentType: file.type || 'audio/mpeg', cacheControl: 'private, max-age=31536000' }
-  });
+  try { await putBlob(env, mediaKey, file, file.type || 'audio/mpeg'); }
+  catch (e) { return json({ error: 'store-failed', message: '保存失败：' + (e.code || e.message) }, 507); }
 
   let artKey = null;
   const art = form.get('art');
   if (art && typeof art !== 'string' && art.size > 0 && art.size < 8 * 1024 * 1024) {
     artKey = `cover/${id}`;
-    await env.MEDIA.put(artKey, art.stream(), {
-      httpMetadata: { contentType: art.type || 'image/jpeg', cacheControl: 'private, max-age=31536000' }
-    });
+    try { await putBlob(env, artKey, art, art.type || 'image/jpeg'); } catch (e) { artKey = null; }
   }
 
   const list = await readIndex(env);

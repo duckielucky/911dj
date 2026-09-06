@@ -1,4 +1,4 @@
-import { json, readIndex, writeIndex, hasStore, noStore } from '../../_lib.js';
+import { json, readIndex, writeIndex, hasStore, noStore, delBlob } from '../../_lib.js';
 
 const FIELDS = ['title', 'artist', 'album', 'order', 'plays', 'liked', 'duration'];
 
@@ -29,7 +29,7 @@ export async function onRequestDelete({ params, env }) {
 
   const [t] = list.splice(i, 1);
   await writeIndex(env, list);
-  await env.MEDIA.delete(t.mediaKey).catch(() => {});
-  if (t.artKey) await env.MEDIA.delete(t.artKey).catch(() => {});
+  await delBlob(env, t.mediaKey);
+  if (t.artKey) await delBlob(env, t.artKey);
   return json({ ok: true });
 }

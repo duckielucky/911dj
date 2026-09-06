@@ -33,7 +33,9 @@ export async function validToken(token, secret, epoch) {
   if (parts.length !== 3) return false;
   const [exp, ep, sig] = parts;
   if (!/^\d+$/.test(exp) || Number(exp) < Date.now()) return false;
-  if (String(ep) !== String(epoch || 0)) return false;
+  // A newer epoch can only come from a token we signed, so a stale cache here
+  // must not reject the very cookie the password change just issued.
+  if (Number(ep) < Number(epoch || 0)) return false;
   try {
     return await crypto.subtle.verify('HMAC', await hmacKey(secret, 'verify'), unb64url(sig), enc.encode(exp + '.' + ep));
   } catch { return false; }
@@ -66,7 +68,7 @@ const AUTH_KEY = 'auth';
 let authCache = null, authAt = 0;
 export async function getAuth(env) {
   const now = Date.now();
-  if (authCache !== null && now - authAt < 60000) return authCache;
+  if (authCache !== null && now - authAt < 10000) return authCache;
   let v = null;
   try { if (env.CONFIG) v = await env.CONFIG.get(AUTH_KEY, 'json'); } catch { v = null; }
   authCache = v; authAt = now;
@@ -99,20 +101,52 @@ export async function checkPassword(env, pw) {
 }
 
 /* ---- storage may not be bound yet (no R2 bucket configured) ---- */
-export const hasStore = env => !!(env && env.MEDIA);
+export const hasStore = env => !!(env && (env.MEDIA || env.CONFIG));
 export const noStore = () => json({ error: 'storage-not-configured' }, 503);
 
-/* ---- the track index lives as one JSON object in R2 ---- */
+/* ---- storage: R2 when it is bound, otherwise the KV namespace ----
+   KV caps a single value at 25 MB and the free tier at 1 GB overall, so it holds
+   a modest library fine. R2 is preferred when present: bigger, cheaper, and it
+   serves byte ranges so seeking does not pull the whole file. */
 const INDEX_KEY = 'index.json';
+export const useR2 = env => !!(env && env.MEDIA);
+export const useKV = env => !!(env && env.CONFIG);
+export const KV_MAX = 24 * 1024 * 1024;
+
 export async function readIndex(env) {
-  const obj = await env.MEDIA.get(INDEX_KEY);
-  if (!obj) return [];
-  try { const v = await obj.json(); return Array.isArray(v) ? v : []; } catch { return []; }
+  try {
+    if (useR2(env)) {
+      const obj = await env.MEDIA.get(INDEX_KEY);
+      if (!obj) return [];
+      const v = await obj.json();
+      return Array.isArray(v) ? v : [];
+    }
+    if (useKV(env)) {
+      const v = await env.CONFIG.get(INDEX_KEY, 'json');
+      return Array.isArray(v) ? v : [];
+    }
+  } catch { /* treat unreadable as empty */ }
+  return [];
 }
 export async function writeIndex(env, list) {
-  await env.MEDIA.put(INDEX_KEY, JSON.stringify(list), {
-    httpMetadata: { contentType: 'application/json; charset=utf-8' }
-  });
+  const body = JSON.stringify(list);
+  if (useR2(env)) {
+    return env.MEDIA.put(INDEX_KEY, body, { httpMetadata: { contentType: 'application/json; charset=utf-8' } });
+  }
+  return env.CONFIG.put(INDEX_KEY, body);
+}
+/* Blobs. R2 streams; KV needs the whole thing in memory, hence the size cap. */
+export async function putBlob(env, key, file, contentType) {
+  if (useR2(env)) {
+    return env.MEDIA.put(key, file.stream(), {
+      httpMetadata: { contentType: contentType || 'application/octet-stream', cacheControl: 'private, max-age=31536000' }
+    });
+  }
+  if (file.size > KV_MAX) { const e = new Error('kv-too-large'); e.code = 'kv-too-large'; throw e; }
+  await env.CONFIG.put(key, await file.arrayBuffer(), { metadata: { ct: contentType || 'application/octet-stream' } });
+}
+export async function delBlob(env, key) {
+  try { return useR2(env) ? env.MEDIA.delete(key) : env.CONFIG.delete(key); } catch { /* already gone */ }
 }
 export const EXT_OK = /\.(mp3|m4a|aac|wav|flac|ogg|oga|opus|webm|aiff?)$/i;
 export const safeExt = name => {
