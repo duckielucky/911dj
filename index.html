@@ -2271,19 +2271,24 @@ function peaksOf(buf, n){
 async function bandsOf(buf, n){
   const rate = 22050;
   const len = Math.max(1, Math.ceil(buf.duration * rate));
+  // A single wide bandpass let the mids swallow everything, so the middle band is
+  // a highpass and a lowpass in series — a real 250–2500 Hz window.
   const defs = [
-    { type:'lowpass',  freq:200  },
-    { type:'bandpass', freq:1200, q:0.6 },
-    { type:'highpass', freq:4000 }
+    { chain:[{ type:'lowpass',  freq:250  }] },
+    { chain:[{ type:'highpass', freq:250  }, { type:'lowpass', freq:2500 }] },
+    { chain:[{ type:'highpass', freq:3500 }] }
   ];
   const out = [];
   for(const d of defs){
     const oc = new OfflineAudioContext(1, len, rate);
     const src = oc.createBufferSource(); src.buffer = buf;
-    const f = oc.createBiquadFilter();
-    f.type = d.type; f.frequency.value = d.freq;
-    if(d.q) f.Q.value = d.q;
-    src.connect(f); f.connect(oc.destination); src.start();
+    let node = src;
+    for(const st of d.chain){
+      const f = oc.createBiquadFilter();
+      f.type = st.type; f.frequency.value = st.freq; f.Q.value = 0.707;
+      node.connect(f); node = f;
+    }
+    node.connect(oc.destination); src.start();
     const rendered = (await oc.startRendering()).getChannelData(0);
     const step = Math.max(1, Math.floor(rendered.length / n)), col = new Float32Array(n);
     for(let i = 0; i < n; i++){
@@ -2295,12 +2300,14 @@ async function bandsOf(buf, n){
   }
   // Normalise each band against its own loudest column, so a quiet hi-hat still
   // reads as treble instead of being swamped by the kick.
+  // Scale against the 95th percentile, not the single loudest column, so one
+  // stray transient cannot dim the whole track.
   return out.map(col => {
-    let max = 0;
-    for(let i = 0; i < col.length; i++) if(col[i] > max) max = col[i];
-    if(max <= 0) return col;
+    const sorted = Array.from(col).sort((x, y) => x - y);
+    const ref = sorted[Math.floor(sorted.length * 0.95)] || sorted[sorted.length - 1] || 0;
+    if(ref <= 0) return col;
     const o = new Float32Array(col.length);
-    for(let i = 0; i < col.length; i++) o[i] = col[i] / max;
+    for(let i = 0; i < col.length; i++) o[i] = Math.min(1, col[i] / ref);
     return o;
   });
 }
@@ -2372,12 +2379,14 @@ function drawWave(id){
     const v = Math.pow(d.peaks[i], .75) * mid * 1.85;
     const ahead = (i / n) > played;
     if(B){
-      const lo = B[0][i], md = B[1][i], hi = B[2][i];
-      const top = Math.max(lo, md, hi, 1e-6);
-      const r = Math.round(255 * Math.pow(lo / top, .7));
-      const gg = Math.round(255 * Math.pow(md / top, .7));
-      const b = Math.round(255 * Math.pow(hi / top, .7));
-      g.fillStyle = 'rgba(' + r + ',' + gg + ',' + b + ',' + (ahead ? .42 : 1) + ')';
+      // Absolute band strengths, so two loud bands blend: bass+treble reads pink,
+      // bass+mid orange, mid+treble cyan — the palette the pro decks show.
+      const r  = Math.round(255 * Math.min(1, Math.pow(B[0][i], .55) * 1.15));
+      const gg = Math.round(255 * Math.min(1, Math.pow(B[1][i], .55) * 1.05));
+      const b  = Math.round(255 * Math.min(1, Math.pow(B[2][i], .55) * 1.25));
+      const lift = Math.max(r, gg, b) < 70 ? 70 - Math.max(r, gg, b) : 0;
+      g.fillStyle = 'rgba(' + Math.min(255, r + lift) + ',' + Math.min(255, gg + lift) + ','
+                  + Math.min(255, b + lift) + ',' + (ahead ? .45 : 1) + ')';
     } else {
       g.fillStyle = ahead
         ? (id === 'a' ? 'rgba(63,182,255,.32)' : 'rgba(255,111,192,.32)')
