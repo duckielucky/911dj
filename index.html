@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>911.COM</title>
+<title>911DJ.COM</title>
 <style>
 :root{
   --bg:#02040c; --panel:rgba(255,255,255,.022); --line:rgba(120,165,255,.10); --line-2:rgba(120,165,255,.18);
@@ -275,6 +275,88 @@ body.playing .eq i{animation-play-state:running}
 .foot .tag{font-size:12px;color:#5f6a83;margin-top:8px}
 .foot-links{margin-left:auto;display:flex;gap:20px;font-size:12.5px;color:#7c879f;flex-wrap:wrap}
 
+
+/* ============================== 打碟台 ============================== */
+.mix-head{padding:34px 0 6px}
+.mix-head h1{margin:0;font-size:clamp(24px,3.2vw,34px);font-weight:900;letter-spacing:-.8px;display:flex;align-items:center;gap:12px}
+.mix-head .sub{margin-top:8px;font-size:12.5px;color:#68738c;letter-spacing:.04em}
+.mix{display:grid;grid-template-columns:minmax(0,1fr) 200px minmax(0,1fr);gap:16px;margin:20px 0 10px;
+  border-radius:20px;padding:18px;border:1px solid var(--line);background:rgba(255,255,255,.015)}
+.deck{border-radius:16px;padding:16px;border:1px solid var(--line);background:linear-gradient(170deg,rgba(255,255,255,.04),rgba(255,255,255,.012));min-width:0}
+.deck.a{box-shadow:inset 0 0 60px rgba(34,167,255,.06)}
+.deck.b{box-shadow:inset 0 0 60px rgba(255,63,164,.06)}
+.deck-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.deck-tag{font-size:10px;letter-spacing:.28em;font-weight:800}
+.deck.a .deck-tag{color:#3fb6ff}
+.deck.b .deck-tag{color:#ff6fc0}
+.deck-name{margin-top:6px;font-size:14px;font-weight:700;color:#cfd8ea;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px}
+.btn-load{padding:7px 14px;border-radius:8px;font-size:10.5px;font-weight:800;letter-spacing:.1em;background:rgba(255,255,255,.05);border:1px solid var(--line-2);color:#cfd8ea;flex:0 0 auto}
+.btn-load:hover{background:rgba(255,255,255,.12)}
+.wave{position:relative;height:76px;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.35);border:1px solid var(--line);cursor:pointer}
+.wave canvas{display:block;width:100%;height:100%}
+.wave .mid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.5)}
+.wtime{display:flex;justify-content:space-between;font-size:10px;color:#5f6b85;margin-top:5px;font-variant-numeric:tabular-nums}
+.deck-mid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;margin:14px 0}
+.jog{width:104px;height:104px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;position:relative;
+  background:radial-gradient(circle at 38% 32%,#1a2033,#080c16 68%);border:1px solid rgba(255,255,255,.10)}
+.deck.a .jog{box-shadow:0 0 0 3px rgba(34,167,255,.16), 0 0 26px rgba(34,167,255,.18)}
+.deck.b .jog{box-shadow:0 0 0 3px rgba(255,63,164,.16), 0 0 26px rgba(255,63,164,.18)}
+.jog i{position:absolute;inset:16px;border-radius:50%;border:1px solid rgba(255,255,255,.06)}
+.jog b{font-size:12px;font-weight:900;font-style:italic;color:#aab6cc;line-height:1.15;text-align:center;z-index:2}
+.jog.spin i{animation:spin 2.6s linear infinite}
+.tbtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tb{height:44px;border-radius:9px;font-size:11.5px;font-weight:800;letter-spacing:.1em;background:rgba(255,255,255,.045);border:1px solid var(--line-2);color:#cfd8ea;display:grid;place-items:center}
+.tb:hover{background:rgba(255,255,255,.1)}
+.tb.play{color:#fff;border:0}
+.deck.a .tb.play{background:linear-gradient(120deg,#1f7fe0,#3fb6ff);box-shadow:0 6px 18px rgba(34,167,255,.3)}
+.deck.b .tb.play{background:linear-gradient(120deg,#a12bd6,#ff45a8);box-shadow:0 6px 18px rgba(220,50,180,.3)}
+.tb.on{outline:1px solid rgba(255,255,255,.45)}
+.bpmrow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;margin-bottom:10px}
+.bpmbox{border-radius:9px;padding:7px 12px;border:1px solid var(--line-2);background:rgba(255,255,255,.04);min-width:78px}
+.bpmbox span{display:block;font-size:8.5px;letter-spacing:.2em;color:#5f6b85;font-weight:800}
+.bpmbox b{display:block;font-size:17px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:2px}
+.deck.a .bpmbox b{color:#3fb6ff}
+.deck.b .bpmbox b{color:#ff6fc0}
+.knobs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.kn{min-width:0}
+.kn label,.slab{display:block;font-size:8.5px;letter-spacing:.18em;color:#5f6b85;font-weight:800;text-align:center;margin-bottom:5px}
+.slab.l{text-align:left}
+.mixrange{-webkit-appearance:none;appearance:none;width:100%;height:16px;background:transparent;outline:none;cursor:pointer}
+.mixrange::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:rgba(255,255,255,.16)}
+.mixrange::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-6px;border-radius:4px;background:#e8eefc;box-shadow:0 1px 5px rgba(0,0,0,.6)}
+.deck.a .mixrange::-webkit-slider-runnable-track{background:linear-gradient(90deg,rgba(63,182,255,.55),rgba(255,255,255,.14))}
+.deck.b .mixrange::-webkit-slider-runnable-track{background:linear-gradient(90deg,rgba(255,111,192,.55),rgba(255,255,255,.14))}
+.pitchrow{display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:8px;align-items:center}
+.pitchval{font-size:10.5px;color:#8b96ad;text-align:right;font-variant-numeric:tabular-nums}
+
+.center{border-radius:16px;padding:16px 14px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012))}
+.center .logo-txt b{font-size:19px}
+.viz{display:flex;align-items:flex-end;gap:3px;height:64px}
+.viz i{width:7px;border-radius:2px;background:linear-gradient(180deg,#ff45a8,#f59e0b 45%,#22d3ee);height:6px;transition:height .06s linear}
+.fx{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+.fxb{height:34px;border-radius:8px;font-size:9.5px;font-weight:800;letter-spacing:.12em;background:rgba(255,255,255,.04);border:1px solid var(--line-2);color:#aab6cc}
+.fxb:hover{background:rgba(255,255,255,.1)}
+.fxb.on{background:var(--grad-btn);color:#fff;border-color:transparent}
+.xf{width:100%}
+.xf .ends{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.18em;color:#5f6b85;font-weight:800;margin-bottom:5px}
+#xfader::-webkit-slider-runnable-track{background:linear-gradient(90deg,rgba(63,182,255,.6),rgba(255,255,255,.14) 50%,rgba(255,111,192,.6))}
+.mixtip{font-size:12px;color:#5f6b85;line-height:1.8;padding:6px 0 10px}
+
+@media (max-width:1080px){
+  .mix{grid-template-columns:minmax(0,1fr);gap:14px}
+  .center{order:3;flex-direction:row;flex-wrap:wrap;justify-content:center}
+  .center .viz{order:-1}
+  .fx{width:auto;grid-template-columns:repeat(4,auto)}
+  .xf{max-width:340px}
+}
+@media (max-width:640px){
+  .deck-mid{grid-template-columns:minmax(0,1fr)}
+  .jog{margin:0 auto}
+  .knobs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fx{grid-template-columns:repeat(2,auto)}
+}
+
 /* ---------------------------------------------------------- player bar */
 .bar{
   position:fixed;left:0;right:0;bottom:0;z-index:70;height:calc(var(--bar-h) + var(--safe));
@@ -452,7 +534,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
           <rect x="17.3" y="13.5" width="4.2" height="7" rx="2.1" fill="#9fb6ff" stroke="none"/>
         </svg>
       </span>
-      <span class="logo-txt"><b>911<i>.COM</i></b><span>MUSIC BEYOND LIMITS</span></span>
+      <span class="logo-txt"><b>911DJ<i>.COM</i></b><span>MUSIC BEYOND LIMITS</span></span>
     </div>
 
     <div class="nav-links" id="navLinks">
@@ -461,6 +543,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
       <button data-page="charts">热门榜单</button>
       <button data-page="artists">音乐人</button>
       <button data-page="favorites">我的收藏</button>
+      <button data-page="mix">打碟台</button>
       <button data-page="about">关于我们</button>
     </div>
 
@@ -505,7 +588,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
         <div class="script">Music<br>Connects<br>Us &#9825;</div>
         <div class="disc-wrap">
           <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
-          <div class="disc"><span class="hole"></span><b>911</b><span>LIVE REMIX</span></div>
+          <div class="disc"><span class="hole"></span><b>911DJ</b><span>LIVE REMIX</span></div>
         </div>
         <div class="mixer">
           <span class="knob"><i></i></span><span class="knob pink"><i></i></span>
@@ -560,7 +643,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
           <div><kbd>S</kbd> 随机播放</div><div><kbd>R</kbd> 循环播放</div>
           <div><kbd>F</kbd> 全屏播放</div><div><kbd>/</kbd> 搜索</div>
         </div>
-        <button class="pill pill-ghost" id="btnAbout" style="height:40px;padding:0 22px">关于 911.COM</button>
+        <button class="pill pill-ghost" id="btnAbout" style="height:40px;padding:0 22px">关于 911DJ.COM</button>
       </div>
     </div>
   </div>
@@ -645,7 +728,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
   <div class="wrap">
     <div class="page-head band">
       <div class="sec-kicker">ABOUT</div>
-      <h1>911<span class="g">.COM</span></h1>
+      <h1>911DJ<span class="g">.COM</span></h1>
     </div>
     <div class="panels" style="margin-top:0">
       <div class="panel">
@@ -715,6 +798,115 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
   </div>
 </section>
 
+<!-- ======================================================== 打碟台 ======= -->
+<section class="page" id="pg-mix" hidden>
+  <div class="wrap">
+    <div class="mix-head">
+      <h1>&#127911; 在线打碟台</h1>
+      <div class="sub">双 Deck &middot; Pitch &middot; EQ &middot; Filter &middot; 音量 &middot; Crossfader &middot; 本地音频载入</div>
+    </div>
+
+    <div class="mix">
+      <section class="deck a" id="deckA">
+        <div class="deck-top">
+          <div>
+            <div class="deck-tag">DECK A</div>
+            <div class="deck-name" id="nmA">载入歌曲到 Deck A</div>
+          </div>
+          <button class="btn-load" data-load="a">LOAD A</button>
+        </div>
+        <div class="wave" data-wave="a"><canvas id="wvA"></canvas><span class="mid"></span></div>
+        <div class="wtime"><span id="tAA">00:00</span><span id="tBA">-00:00</span></div>
+        <div class="deck-mid">
+          <div class="jog" id="jogA"><i></i><b>911<br>DJ</b></div>
+          <div class="tbtns">
+            <button class="tb" data-cue="a">CUE</button>
+            <button class="tb play" data-play="a" id="plA">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg>
+            </button>
+            <button class="tb" data-sync="a">SYNC</button>
+          </div>
+        </div>
+        <div class="bpmrow">
+          <div class="bpmbox"><span>BPM</span><b id="bpmA">--</b></div>
+          <div><span class="slab l">PITCH</span>
+            <div class="pitchrow">
+              <input class="mixrange" type="range" id="pitA" min="-8" max="8" step="0.1" value="0">
+              <span class="pitchval" id="pvA">0.0%</span>
+            </div>
+          </div>
+        </div>
+        <div class="knobs">
+          <div class="kn"><label>HI</label><input class="mixrange" type="range" data-eq="a:hi" min="0" max="100" value="50"></div>
+          <div class="kn"><label>MID</label><input class="mixrange" type="range" data-eq="a:mid" min="0" max="100" value="50"></div>
+          <div class="kn"><label>LOW</label><input class="mixrange" type="range" data-eq="a:low" min="0" max="100" value="50"></div>
+          <div class="kn"><label>FILTER</label><input class="mixrange" type="range" data-eq="a:flt" min="0" max="100" value="50"></div>
+        </div>
+        <div><span class="slab l">CH VOL</span>
+          <input class="mixrange" type="range" data-vol="a" min="0" max="100" value="85"></div>
+      </section>
+
+      <section class="center">
+        <div class="logo-txt" style="text-align:center"><b>911DJ<i>.COM</i></b><span>WEB MIX</span></div>
+        <div class="viz" id="viz"></div>
+        <div class="xf"><span class="slab l">MASTER</span>
+          <input class="mixrange" type="range" id="master" min="0" max="100" value="85"></div>
+        <div class="fx">
+          <button class="fxb" data-fx="echo">ECHO</button>
+          <button class="fxb" data-fx="filter">FILTER</button>
+          <button class="fxb" data-fx="brake">BRAKE</button>
+          <button class="fxb" data-fx="boost">BOOST</button>
+        </div>
+        <div class="xf">
+          <div class="ends"><span>A</span><span>CROSSFADER</span><span>B</span></div>
+          <input class="mixrange" type="range" id="xfader" min="0" max="100" value="50">
+        </div>
+      </section>
+
+      <section class="deck b" id="deckB">
+        <div class="deck-top">
+          <div>
+            <div class="deck-tag">DECK B</div>
+            <div class="deck-name" id="nmB">载入歌曲到 Deck B</div>
+          </div>
+          <button class="btn-load" data-load="b">LOAD B</button>
+        </div>
+        <div class="wave" data-wave="b"><canvas id="wvB"></canvas><span class="mid"></span></div>
+        <div class="wtime"><span id="tAB">00:00</span><span id="tBB">-00:00</span></div>
+        <div class="deck-mid">
+          <div class="jog" id="jogB"><i></i><b>911<br>DJ</b></div>
+          <div class="tbtns">
+            <button class="tb" data-cue="b">CUE</button>
+            <button class="tb play" data-play="b" id="plB">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg>
+            </button>
+            <button class="tb" data-sync="b">SYNC</button>
+          </div>
+        </div>
+        <div class="bpmrow">
+          <div class="bpmbox"><span>BPM</span><b id="bpmB">--</b></div>
+          <div><span class="slab l">PITCH</span>
+            <div class="pitchrow">
+              <input class="mixrange" type="range" id="pitB" min="-8" max="8" step="0.1" value="0">
+              <span class="pitchval" id="pvB">0.0%</span>
+            </div>
+          </div>
+        </div>
+        <div class="knobs">
+          <div class="kn"><label>HI</label><input class="mixrange" type="range" data-eq="b:hi" min="0" max="100" value="50"></div>
+          <div class="kn"><label>MID</label><input class="mixrange" type="range" data-eq="b:mid" min="0" max="100" value="50"></div>
+          <div class="kn"><label>LOW</label><input class="mixrange" type="range" data-eq="b:low" min="0" max="100" value="50"></div>
+          <div class="kn"><label>FILTER</label><input class="mixrange" type="range" data-eq="b:flt" min="0" max="100" value="50"></div>
+        </div>
+        <div><span class="slab l">CH VOL</span>
+          <input class="mixrange" type="range" data-vol="b" min="0" max="100" value="85"></div>
+      </section>
+    </div>
+
+    <div class="mixtip">使用：LOAD A / LOAD B 载入两首歌 &rarr; PLAY &rarr; 调 Pitch / EQ / 音量 &rarr; 中间 Crossfader 混音。波形区域可点击跳转播放位置。</div>
+  </div>
+</section>
+
 <div class="wrap">
   <footer class="foot">
     <div class="logo">
@@ -724,7 +916,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
           <rect x="17.3" y="13.5" width="4.2" height="7" rx="2.1" fill="#9fb6ff" stroke="none"/>
         </svg>
       </span>
-      <span class="logo-txt"><b>911<i>.COM</i></b><span class="tag" id="stStore">已保存在此设备</span></span>
+      <span class="logo-txt"><b>911DJ<i>.COM</i></b><span class="tag" id="stStore">已保存在此设备</span></span>
     </div>
     <div class="foot-links">
       <span>MP3</span><span>M4A</span><span>WAV</span><span>FLAC</span><span>OGG</span><span>OPUS</span>
@@ -804,7 +996,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
   <div class="full-shade"></div>
   <div class="full-top">
     <button class="ib" id="fClose" title="关闭（Esc）"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.4 5.3 8.7l1.4-1.4L12 12.6l5.3-5.3 1.4 1.4L12 15.4z"/></svg></button>
-    <div class="lbl">正在播放 · 911.COM</div>
+    <div class="lbl">正在播放 · 911DJ.COM</div>
     <button class="ib" id="fMenu" title="更多"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
   </div>
   <div class="full-body">
@@ -843,6 +1035,20 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
     <p>MP3、M4A、WAV、FLAC、OGG &mdash;&mdash; 单个文件或整个文件夹</p>
   </div>
 </div>
+
+
+<div class="modal" id="picker" hidden>
+  <div class="sheet">
+    <h3 id="pickTitle">载入歌曲</h3>
+    <p class="sub">从曲库里选一首，或直接从电脑选择音频文件。</p>
+    <div class="upnext" id="pickList" style="max-height:44vh;margin-top:16px"></div>
+    <div class="sheet-actions">
+      <button class="pill pill-ghost" id="pickClose" style="height:40px;padding:0 22px">取消</button>
+      <button class="pill pill-purple" id="pickLocal" style="height:40px;padding:0 22px">从电脑选择</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="mixFile" accept="audio/*,.mp3,.m4a,.wav,.flac,.ogg" class="hidden">
 
 <div class="toast" id="toast"></div>
 <audio id="audio"></audio>
@@ -938,7 +1144,7 @@ const DB = (() => {
 })();
 /* ------------------------------------------------------------ storage mode
    'local'  — this browser's IndexedDB (opening index.html straight from disk)
-   'server' — the 911.COM site: audio lives in R2, reached through /api and /media  */
+   'server' — the 911DJ.COM site: audio lives in R2, reached through /api and /media  */
 const Store = {
   mode: 'local',
   booted: null,
@@ -1211,7 +1417,7 @@ function emptyHTML(title, body, withBtn){
 }
 
 /* ------------------------------------------------------------- the router */
-const PAGE_TITLES = { home:'911.COM', latest:'最新上架', charts:'热门榜单', artists:'音乐人', artist:'音乐人', favorites:'我的收藏', about:'关于我们' };
+const PAGE_TITLES = { home:'911DJ.COM', latest:'最新上架', charts:'热门榜单', artists:'音乐人', artist:'音乐人', favorites:'我的收藏', mix:'打碟台', about:'关于我们' };
 function go(page, arg){
   if(page === 'artist' && !arg) page = 'artists';
   state.page = page; if(page === 'artist') state.artist = arg;
@@ -1244,6 +1450,7 @@ function renderPage(){
   else if(p === 'artists') renderArtists();
   else if(p === 'artist') renderArtist();
   else if(p === 'favorites') renderFavorites();
+  else if(p === 'mix') mixOpen();
   else if(p === 'about') renderAbout();
   renderStats();
 }
@@ -1435,7 +1642,7 @@ function resetBar(){
   $('#fTitle').textContent = '暂无播放'; $('#fArtist').textContent = '上传歌曲开始播放';
   $('#fArt').style.background = ''; $('#fArt').innerHTML = '';
   $('#btnLike').classList.remove('on');
-  setFullBg(null); setSeek(0); document.title = '911.COM'; setPlayIcon();
+  setFullBg(null); setSeek(0); document.title = '911DJ.COM'; setPlayIcon();
 }
 function setPlayIcon(){
   const p = playingNow();
@@ -1861,6 +2068,309 @@ window.addEventListener('dragleave', e => { e.preventDefault(); if(--dragDepth <
 window.addEventListener('drop', async e => {
   e.preventDefault(); dragDepth = 0; $('#drop').classList.remove('show');
   addFiles(await filesFrom(e.dataTransfer));
+});
+
+
+/* ============================================================ 打碟台 =====
+   Two decks, each: source -> low/mid/high EQ -> sweep filter -> channel gain
+   -> crossfader gain -> master -> analyser -> out.
+   AudioBufferSourceNode (not <audio>) so pitch, cueing and waveform peaks all
+   come off the same decoded buffer. */
+const MIX = { ctx:null, master:null, analyser:null, comp:null, delay:null, fb:null, send:null,
+              mFilter:null, a:null, b:null, raf:0, fx:{}, booted:false };
+
+function mixBoot(){
+  if(MIX.booted) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if(!AC){ toast('浏览器不支持 Web Audio'); return; }
+  const c = MIX.ctx = new AC();
+  MIX.master   = c.createGain();  MIX.master.gain.value = 0.85;
+  MIX.mFilter  = c.createBiquadFilter(); MIX.mFilter.type = 'lowpass'; MIX.mFilter.frequency.value = 22050;
+  MIX.comp     = c.createDynamicsCompressor();
+  MIX.analyser = c.createAnalyser(); MIX.analyser.fftSize = 128; MIX.analyser.smoothingTimeConstant = .75;
+  MIX.delay    = c.createDelay(1.0); MIX.delay.delayTime.value = 0.34;
+  MIX.fb       = c.createGain();  MIX.fb.gain.value = 0.32;
+  MIX.send     = c.createGain();  MIX.send.gain.value = 0;
+  MIX.master.connect(MIX.mFilter); MIX.mFilter.connect(MIX.comp);
+  MIX.comp.connect(MIX.analyser);  MIX.analyser.connect(c.destination);
+  MIX.mFilter.connect(MIX.send);   MIX.send.connect(MIX.delay);
+  MIX.delay.connect(MIX.fb);       MIX.fb.connect(MIX.delay);   MIX.delay.connect(MIX.comp);
+  MIX.a = deckMake('a'); MIX.b = deckMake('b');
+  $('#viz').innerHTML = new Array(14).fill('<i></i>').join('');
+  MIX.booted = true;
+  mixTick();
+}
+function deckMake(id){
+  const c = MIX.ctx;
+  const low = c.createBiquadFilter(); low.type = 'lowshelf';  low.frequency.value = 250;
+  const mid = c.createBiquadFilter(); mid.type = 'peaking';   mid.frequency.value = 1100; mid.Q.value = 1;
+  const hi  = c.createBiquadFilter(); hi.type  = 'highshelf'; hi.frequency.value = 4200;
+  const flt = c.createBiquadFilter(); flt.type = 'lowpass';   flt.frequency.value = 22050;
+  const ch  = c.createGain(); ch.gain.value = 0.85;
+  const xf  = c.createGain(); xf.gain.value = Math.cos(0.25 * Math.PI);
+  low.connect(mid); mid.connect(hi); hi.connect(flt); flt.connect(ch); ch.connect(xf); xf.connect(MIX.master);
+  return { id, low, mid, hi, flt, ch, xf, buffer:null, src:null, peaks:null,
+           playing:false, offset:0, startedAt:0, rate:1, bpm:0, cue:0, name:'' };
+}
+const D = id => (id === 'a' ? MIX.a : MIX.b);
+const U = id => id.toUpperCase();
+
+function deckPos(d){
+  if(!d.buffer) return 0;
+  const t = d.playing ? d.offset + (MIX.ctx.currentTime - d.startedAt) * d.rate : d.offset;
+  return Math.max(0, Math.min(t, d.buffer.duration));
+}
+function deckPlay(d){
+  if(!d.buffer || d.playing) return;
+  if(MIX.ctx.state === 'suspended') MIX.ctx.resume();
+  const s = MIX.ctx.createBufferSource();
+  s.buffer = d.buffer; s.playbackRate.value = d.rate;
+  s.connect(d.low);
+  const at = d.offset >= d.buffer.duration - 0.05 ? 0 : d.offset;
+  d.offset = at; s.start(0, at);
+  s.onended = () => { if(d.src === s && d.playing){ d.playing = false; d.offset = 0; mixPaint(); } };
+  d.src = s; d.startedAt = MIX.ctx.currentTime; d.playing = true;
+  mixPaint();
+}
+function deckPause(d){
+  if(!d.playing) return;
+  d.offset = deckPos(d);
+  try { d.src.onended = null; d.src.stop(); } catch(e){}
+  d.src = null; d.playing = false;
+  mixPaint();
+}
+function deckSeek(d, t){
+  if(!d.buffer) return;
+  const was = d.playing; deckPause(d);
+  d.offset = Math.max(0, Math.min(t, d.buffer.duration));
+  if(was) deckPlay(d); else mixPaint();
+}
+function deckRate(d, r){
+  const at = deckPos(d);
+  d.rate = r;
+  if(d.playing){ d.offset = at; d.startedAt = MIX.ctx.currentTime; d.src.playbackRate.value = r; }
+}
+function peaksOf(buf, n){
+  const ch = buf.getChannelData(0), step = Math.max(1, Math.floor(ch.length / n)), out = new Float32Array(n);
+  for(let i = 0; i < n; i++){
+    let m = 0; const st = i * step, en = Math.min(ch.length, st + step);
+    for(let j = st; j < en; j += 8){ const v = ch[j] < 0 ? -ch[j] : ch[j]; if(v > m) m = v; }
+    out[i] = m;
+  }
+  return out;
+}
+function bpmOf(buf){
+  try {
+    const ch = buf.getChannelData(0), sr = buf.sampleRate;
+    const win = Math.floor(sr * 0.02), n = Math.floor(ch.length / win);
+    if(n < 40) return 0;
+    const env = new Float32Array(n);
+    for(let i = 0; i < n; i++){
+      let sum = 0; const st = i * win;
+      for(let j = 0; j < win; j += 4){ const v = ch[st + j] || 0; sum += v < 0 ? -v : v; }
+      env[i] = sum;
+    }
+    const flux = new Float32Array(n);
+    for(let i = 1; i < n; i++){ const df = env[i] - env[i-1]; flux[i] = df > 0 ? df : 0; }
+    const fps = sr / win;
+    let best = 0, bestBpm = 0;
+    for(let bpm = 70; bpm <= 180; bpm += 0.5){
+      const lag = Math.round(fps * 60 / bpm);
+      if(lag < 2 || lag >= n) continue;
+      let acc = 0;
+      for(let i = lag; i < n; i++) acc += flux[i] * flux[i - lag];
+      if(acc > best){ best = acc; bestBpm = bpm; }
+    }
+    return bestBpm ? Math.round(bestBpm * 10) / 10 : 0;
+  } catch(e){ return 0; }
+}
+async function deckLoad(id, blobOrUrl, name){
+  mixBoot();
+  const d = D(id);
+  $('#nm' + U(id)).textContent = '解码中…';
+  try {
+    const ab = blobOrUrl instanceof Blob ? await blobOrUrl.arrayBuffer()
+             : await (await fetch(blobOrUrl)).arrayBuffer();
+    const buf = await MIX.ctx.decodeAudioData(ab);
+    deckPause(d);
+    d.buffer = buf; d.offset = 0; d.cue = 0; d.name = name || '未命名';
+    d.peaks = peaksOf(buf, 900);
+    d.bpm = bpmOf(buf);
+    $('#nm' + U(id)).textContent = d.name;
+    $('#bpm' + U(id)).textContent = d.bpm ? d.bpm.toFixed(1) : '--';
+    drawWave(id); mixPaint();
+    toast('Deck ' + U(id) + ' 已载入');
+  } catch(e){
+    $('#nm' + U(id)).textContent = '载入失败';
+    toast('无法解码该音频');
+  }
+}
+function drawWave(id){
+  const d = D(id), cv = $('#wv' + U(id));
+  if(!cv) return;
+  const r = cv.parentElement.getBoundingClientRect();
+  if(!r.width) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+  const g = cv.getContext('2d');
+  g.clearRect(0, 0, cv.width, cv.height);
+  if(!d.peaks) return;
+  const n = d.peaks.length, w = cv.width / n, h = cv.height, mid = h / 2;
+  const played = d.buffer ? deckPos(d) / d.buffer.duration : 0;
+  for(let i = 0; i < n; i++){
+    const v = Math.pow(d.peaks[i], .75) * mid * 1.85;
+    g.fillStyle = (i / n) <= played
+      ? (id === 'a' ? 'rgba(63,182,255,.95)' : 'rgba(255,111,192,.95)')
+      : (id === 'a' ? 'rgba(63,182,255,.32)' : 'rgba(255,111,192,.32)');
+    g.fillRect(i * w, mid - v, Math.max(1, w * .62), v * 2);
+  }
+}
+function mixPaint(){
+  ['a','b'].forEach(id => {
+    const d = D(id), L = U(id);
+    const pl = $('#pl' + L), jog = $('#jog' + L);
+    if(pl) pl.innerHTML = d.playing
+      ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7V5zm6 0h4v14h-4V5z"/></svg>'
+      : '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg>';
+    if(jog) jog.classList.toggle('spin', d.playing);
+    const pos = deckPos(d), dur = d.buffer ? d.buffer.duration : 0;
+    const ta = $('#tA' + L), tb = $('#tB' + L);
+    if(ta) ta.textContent = fmt(pos);
+    if(tb) tb.textContent = '-' + fmt(Math.max(0, dur - pos));
+  });
+}
+function mixTick(){
+  cancelAnimationFrame(MIX.raf);
+  const loop = () => {
+    if(state.page === 'mix' && MIX.booted){
+      if(MIX.a.playing || MIX.b.playing){ drawWave('a'); drawWave('b'); mixPaint(); }
+      const bins = new Uint8Array(MIX.analyser.frequencyBinCount);
+      MIX.analyser.getByteFrequencyData(bins);
+      const bars = $$('#viz i');
+      for(let i = 0; i < bars.length; i++){
+        const v = bins[Math.floor(i * bins.length / bars.length / 1.6)] / 255;
+        bars[i].style.height = (6 + v * 56) + 'px';
+      }
+    }
+    MIX.raf = requestAnimationFrame(loop);
+  };
+  MIX.raf = requestAnimationFrame(loop);
+}
+function mixOpen(){
+  mixBoot();
+  setTimeout(() => { drawWave('a'); drawWave('b'); mixPaint(); }, 60);
+}
+addEventListener('resize', () => { if(state.page === 'mix' && MIX.booted){ drawWave('a'); drawWave('b'); } });
+
+document.addEventListener('click', e => {
+  const ld = e.target.closest('[data-load]');
+  if(ld){ mixBoot(); openLoadPicker(ld.getAttribute('data-load')); return; }
+  const pb = e.target.closest('#pg-mix [data-play]');
+  if(pb){ const d = D(pb.getAttribute('data-play'));
+          if(!d.buffer){ toast('请先载入歌曲'); return; }
+          d.playing ? deckPause(d) : deckPlay(d); return; }
+  const cu = e.target.closest('[data-cue]');
+  if(cu){ const d = D(cu.getAttribute('data-cue')); if(!d.buffer) return;
+          if(d.playing){ deckPause(d); deckSeek(d, d.cue); toast('回到 Cue 点'); }
+          else { d.cue = deckPos(d); toast('Cue 点设在 ' + fmt(d.cue)); } return; }
+  const sy = e.target.closest('[data-sync]');
+  if(sy){ const id = sy.getAttribute('data-sync'), d = D(id), o = D(id === 'a' ? 'b' : 'a');
+          if(!d.bpm || !o.bpm){ toast('两边都要有 BPM 才能同步'); return; }
+          const r = (o.bpm * o.rate) / d.bpm;
+          if(r < 0.5 || r > 2){ toast('速度差太大，无法同步'); return; }
+          deckRate(d, r);
+          const pct = Math.max(-8, Math.min(8, (r - 1) * 100));
+          $('#pit' + U(id)).value = pct.toFixed(1);
+          $('#pv' + U(id)).textContent = ((r - 1) * 100).toFixed(1) + '%';
+          toast('已同步到 ' + (o.bpm * o.rate).toFixed(1) + ' BPM'); return; }
+  const fx = e.target.closest('[data-fx]');
+  if(fx){ mixBoot(); mixFx(fx.getAttribute('data-fx'), fx); return; }
+  const wv = e.target.closest('[data-wave]');
+  if(wv){ const id = wv.getAttribute('data-wave'), d = D(id);
+          if(!d.buffer) return;
+          const r = wv.getBoundingClientRect();
+          deckSeek(d, ((e.clientX - r.left) / r.width) * d.buffer.duration);
+          drawWave(id); return; }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if(!MIX.booted || !t.hasAttribute) return;
+  if(t.hasAttribute('data-eq')){
+    const parts = t.getAttribute('data-eq').split(':'), d = D(parts[0]), band = parts[1], v = +t.value;
+    if(band === 'flt'){
+      if(v > 52){ d.flt.type = 'highpass'; d.flt.frequency.value = 20 + Math.pow((v - 52) / 48, 2) * 7000; }
+      else if(v < 48){ d.flt.type = 'lowpass'; d.flt.frequency.value = 200 + Math.pow(v / 48, 2) * 21000; }
+      else { d.flt.type = 'lowpass'; d.flt.frequency.value = 22050; }
+    } else {
+      d[band].gain.value = v <= 50 ? (v / 50) * 26 - 26 : ((v - 50) / 50) * 6;
+    }
+    return;
+  }
+  if(t.hasAttribute('data-vol')){ D(t.getAttribute('data-vol')).ch.gain.value = t.value / 100; return; }
+  if(t.id === 'master'){ MIX.master.gain.value = (t.value / 100) * (MIX.fx.boost ? 1.45 : 1); return; }
+  if(t.id === 'xfader'){
+    const x = t.value / 100;
+    MIX.a.xf.gain.value = Math.cos(x * Math.PI / 2);
+    MIX.b.xf.gain.value = Math.sin(x * Math.PI / 2);
+    return;
+  }
+  if(t.id === 'pitA' || t.id === 'pitB'){
+    const id = t.id === 'pitA' ? 'a' : 'b';
+    deckRate(D(id), 1 + (+t.value) / 100);
+    $('#pv' + U(id)).textContent = (+t.value).toFixed(1) + '%';
+  }
+});
+function mixFx(kind, btn){
+  const c = MIX.ctx, now = c.currentTime;
+  if(kind === 'echo'){
+    MIX.fx.echo = !MIX.fx.echo; btn.classList.toggle('on', MIX.fx.echo);
+    MIX.send.gain.setTargetAtTime(MIX.fx.echo ? 0.45 : 0, now, .05);
+  } else if(kind === 'filter'){
+    MIX.fx.filter = !MIX.fx.filter; btn.classList.toggle('on', MIX.fx.filter);
+    MIX.mFilter.frequency.setTargetAtTime(MIX.fx.filter ? 700 : 22050, now, .08);
+  } else if(kind === 'boost'){
+    MIX.fx.boost = !MIX.fx.boost; btn.classList.toggle('on', MIX.fx.boost);
+    MIX.master.gain.setTargetAtTime((+$('#master').value / 100) * (MIX.fx.boost ? 1.45 : 1), now, .05);
+  } else if(kind === 'brake'){
+    btn.classList.add('on');
+    ['a','b'].forEach(id => {
+      const d = D(id);
+      if(!d.playing) return;
+      const r = d.rate;
+      d.src.playbackRate.cancelScheduledValues(now);
+      d.src.playbackRate.setValueAtTime(r, now);
+      d.src.playbackRate.linearRampToValueAtTime(0.02, now + .55);
+      d.src.playbackRate.linearRampToValueAtTime(r, now + 1.15);
+    });
+    setTimeout(() => btn.classList.remove('on'), 1200);
+  }
+}
+function openLoadPicker(id){
+  const rows = state.tracks.map(t =>
+    '<div class="un" data-pick="' + t.id + '">' +
+      '<div class="un-art" style="background:' + gradOf(t) + '">' + (t.artUrl ? '<img src="' + t.artUrl + '" alt="">' : '') + '</div>' +
+      '<div><div class="un-t">' + esc(t.title) + '</div><div class="un-a">' + esc(t.artist) + '</div></div>' +
+      '<div class="un-d">' + fmt(t.duration) + '</div></div>').join('');
+  $('#pickTitle').textContent = '载入到 Deck ' + U(id);
+  $('#pickList').innerHTML = rows || '<div class="un-empty">曲库还是空的，可以直接从电脑选择文件。</div>';
+  $('#pickList').setAttribute('data-target', id);
+  $('#picker').hidden = false;
+}
+$('#pickClose').onclick = () => { $('#picker').hidden = true; };
+$('#picker').addEventListener('click', e => { if(e.target === $('#picker')) $('#picker').hidden = true; });
+$('#pickLocal').onclick = () => $('#mixFile').click();
+$('#mixFile').onchange = e => {
+  const f = e.target.files && e.target.files[0];
+  const id = $('#pickList').getAttribute('data-target') || 'a';
+  if(f){ $('#picker').hidden = true; deckLoad(id, f, f.name.replace(/\.[^.]+$/, '')); }
+  e.target.value = '';
+};
+$('#pickList').addEventListener('click', e => {
+  const row = e.target.closest('[data-pick]'); if(!row) return;
+  const t = byId(row.getAttribute('data-pick'));
+  const id = $('#pickList').getAttribute('data-target') || 'a';
+  $('#picker').hidden = true;
+  if(t) deckLoad(id, t.url, t.title);
 });
 
 /* ------------------------------------------------------------------- boot */

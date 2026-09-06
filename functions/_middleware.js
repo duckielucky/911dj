@@ -66,10 +66,10 @@ code{background:rgba(255,255,255,.06);padding:2px 7px;border-radius:6px;font-siz
 <div class="mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9fb6ff" stroke-width="1.9" stroke-linecap="round">
 <path d="M4 14v-2a8 8 0 0116 0v2"/><rect x="2.5" y="13.5" width="4.2" height="7" rx="2.1" fill="#9fb6ff" stroke="none"/>
 <rect x="17.3" y="13.5" width="4.2" height="7" rx="2.1" fill="#9fb6ff" stroke="none"/></svg></div>
-<h1>911<i>.COM</i></h1><div class="tag">MUSIC BEYOND LIMITS</div>
+<h1>911DJ<i>.COM</i></h1><div class="tag">MUSIC BEYOND LIMITS</div>
 ${body}</div></body></html>`;
 
-const loginPage = () => SHELL('911.COM · 登录', `
+const loginPage = () => SHELL('911DJ.COM · 登录', `
 <p>这是一个私人音乐库。请输入访问密码。</p>
 <label for="pw">访问密码</label>
 <input id="pw" type="password" autocomplete="current-password" autofocus>
@@ -95,7 +95,7 @@ go.addEventListener('click', submit);
 pw.addEventListener('keydown', e => { if(e.key === 'Enter') submit(); });
 </script>`);
 
-const setupPage = (missing = []) => SHELL('911.COM · 待配置', `
+const setupPage = (missing = []) => SHELL('911DJ.COM · 待配置', `
 <p>还差最后一步：在 Cloudflare Pages 项目 <code>911</code> 的
 <code>设置 → 环境变量 → Production</code> 中添加
 ${missing.map(m => `<code>${m}</code>`).join(' 和 ')}（勾选 Encrypt），保存后重新部署一次。</p>
