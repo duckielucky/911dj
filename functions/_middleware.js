@@ -7,8 +7,11 @@ export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
 
-  if (!env.SESSION_SECRET || !env.SITE_PASSWORD) {
-    return new Response(setupPage(), { status: 503, headers: { 'content-type': 'text/html; charset=utf-8' } });
+  const missing = [];
+  if (!env.SITE_PASSWORD) missing.push('SITE_PASSWORD');
+  if (!env.SESSION_SECRET) missing.push('SESSION_SECRET');
+  if (missing.length) {
+    return new Response(setupPage(missing), { status: 503, headers: { 'content-type': 'text/html; charset=utf-8' } });
   }
   if (OPEN_PATHS.has(url.pathname)) return next();
 
@@ -92,7 +95,8 @@ go.addEventListener('click', submit);
 pw.addEventListener('keydown', e => { if(e.key === 'Enter') submit(); });
 </script>`);
 
-const setupPage = () => SHELL('911.COM · 待配置', `
-<p>站点还没有配置完成。请在 Cloudflare Pages 的
-<code>设置 → 环境变量</code> 中添加 <code>SITE_PASSWORD</code> 和 <code>SESSION_SECRET</code>，
-并绑定名为 <code>MEDIA</code> 的 R2 存储桶，然后重新部署。详见 <code>DEPLOY.md</code>。</p>`);
+const setupPage = (missing = []) => SHELL('911.COM · 待配置', `
+<p>还差最后一步：在 Cloudflare Pages 项目 <code>911</code> 的
+<code>设置 → 环境变量 → Production</code> 中添加
+${missing.map(m => `<code>${m}</code>`).join(' 和 ')}（勾选 Encrypt），保存后重新部署一次。</p>
+<p style="color:#6b7690;font-size:12.5px">域名、HTTPS 与密码保护程序都已就绪，设好密码后这里就会变成登录页。</p>`);
