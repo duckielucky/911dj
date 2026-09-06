@@ -357,6 +357,33 @@ body.playing .eq i{animation-play-state:running}
   .fx{grid-template-columns:repeat(2,auto)}
 }
 
+/* ---------------------------------------------------- 手机侧边抽屉 ---- */
+.burger{display:none;width:38px;height:38px;border-radius:10px;place-items:center;color:#cfd8ea;
+  background:rgba(255,255,255,.05);border:1px solid var(--line-2);flex:0 0 auto}
+.burger:hover{background:rgba(255,255,255,.1)}
+.drawer{position:fixed;inset:0;z-index:820;visibility:hidden}
+.drawer.open{visibility:visible}
+.drawer-bg{position:absolute;inset:0;background:rgba(2,4,10,.72);backdrop-filter:blur(5px);opacity:0;transition:opacity .22s}
+.drawer.open .drawer-bg{opacity:1}
+.drawer-panel{
+  position:absolute;left:0;top:0;bottom:0;width:min(292px,84vw);padding:20px 14px calc(20px + var(--safe));
+  background:#070b14;border-right:1px solid var(--line-2);box-shadow:26px 0 60px rgba(0,0,0,.6);
+  display:flex;flex-direction:column;gap:5px;overflow-y:auto;
+  transform:translateX(-100%);transition:transform .24s cubic-bezier(.3,.8,.3,1);
+}
+.drawer.open .drawer-panel{transform:none}
+.drawer-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding:0 6px}
+.drawer-panel .dlink{
+  display:flex;align-items:center;gap:12px;padding:13px 12px;border-radius:10px;
+  font-size:15px;font-weight:700;color:#9aa6bd;text-align:left;transition:.15s;
+}
+.drawer-panel .dlink:hover{background:rgba(255,255,255,.06);color:#fff}
+.drawer-panel .dlink.on{color:#fff;background:linear-gradient(100deg,rgba(124,58,237,.28),rgba(255,63,164,.14))}
+.drawer-panel .dlink .ic{width:22px;text-align:center;font-size:15px;flex:0 0 auto}
+.drawer-sep{height:1px;background:var(--line);margin:12px 8px}
+.drawer-acts{display:grid;gap:9px;padding:0 6px;margin-top:auto}
+@media (max-width:900px){ .burger{display:grid} }
+
 /* ---------------------------------------------------------- player bar */
 .bar{
   position:fixed;left:0;right:0;bottom:0;z-index:70;height:calc(var(--bar-h) + var(--safe));
@@ -527,6 +554,9 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
 
 <nav class="nav">
   <div class="wrap nav-in">
+    <button class="burger" id="burger" aria-label="菜单">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
+    </button>
     <div class="logo" id="logo" title="首页">
       <span class="logo-mark">
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#9fb6ff" stroke-width="1.9" stroke-linecap="round">
@@ -545,6 +575,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
       <button data-page="favorites">我的收藏</button>
       <button data-page="mix">打碟台</button>
       <button data-page="about">关于我们</button>
+      <button data-page="settings">设置</button>
     </div>
 
     <div class="nav-actions">
@@ -755,27 +786,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
         </div>
       </div>
     </div>
-    <div class="panels" id="pwPanels" hidden>
-      <div class="panel c">
-        <div class="sec-kicker">ACCESS</div>
-        <h3>修改访问密码</h3>
-        <div class="pwform">
-          <div><label for="pwCur">当前密码</label><input id="pwCur" type="password" autocomplete="current-password"></div>
-          <div><label for="pwNew">新密码</label><input id="pwNew" type="password" autocomplete="new-password"></div>
-          <div><label for="pwNew2">再输入一次</label><input id="pwNew2" type="password" autocomplete="new-password"></div>
-        </div>
-        <div class="pwmsg" id="pwMsg"></div>
-        <button class="pill pill-purple" id="pwSave" style="height:40px;padding:0 22px">保存新密码</button>
-      </div>
-      <div class="panel">
-        <div class="sec-kicker">NOTE</div>
-        <h3>改密码之后</h3>
-        <div class="checks">
-          <div><i>&#10003;</i> 这台设备保持登录</div><div><i>&#10003;</i> 其他设备全部退出</div>
-          <div><i>&#10003;</i> 新密码至少 6 位</div><div><i>&#10003;</i> 只保存加密后的哈希</div>
-        </div>
-      </div>
-    </div>
 
     <div class="panels">
       <div class="panel b">
@@ -788,11 +798,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
           <div><kbd>F</kbd> 全屏播放</div><div><kbd>M</kbd> 静音</div>
           <div><kbd>/</kbd> 搜索</div><div><kbd>Esc</kbd> 关闭浮层</div>
         </div>
-      </div>
-      <div class="panel">
-        <div class="sec-kicker">DANGER ZONE</div>
-        <h3>重新开始</h3>
-        <button class="pill pill-ghost" id="btnClear" style="height:40px;padding:0 22px">清空曲库</button>
       </div>
     </div>
   </div>
@@ -904,6 +909,54 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
     </div>
 
     <div class="mixtip">使用：LOAD A / LOAD B 载入两首歌 &rarr; PLAY &rarr; 调 Pitch / EQ / 音量 &rarr; 中间 Crossfader 混音。波形区域可点击跳转播放位置。</div>
+  </div>
+</section>
+
+<!-- ======================================================== 设置 ======= -->
+<section class="page" id="pg-settings" hidden>
+  <div class="wrap">
+    <div class="page-head band">
+      <div class="sec-kicker">SETTINGS</div>
+      <h1>设置</h1>
+    </div>
+    <div class="panels" id="pwPanels" hidden>
+      <div class="panel c">
+        <div class="sec-kicker">ACCESS</div>
+        <h3>修改访问密码</h3>
+        <div class="pwform">
+          <div><label for="pwCur">当前密码</label><input id="pwCur" type="password" autocomplete="current-password"></div>
+          <div><label for="pwNew">新密码</label><input id="pwNew" type="password" autocomplete="new-password"></div>
+          <div><label for="pwNew2">再输入一次</label><input id="pwNew2" type="password" autocomplete="new-password"></div>
+        </div>
+        <div class="pwmsg" id="pwMsg"></div>
+        <button class="pill pill-purple" id="pwSave" style="height:40px;padding:0 22px">保存新密码</button>
+      </div>
+      <div class="panel">
+        <div class="sec-kicker">NOTE</div>
+        <h3>改密码之后</h3>
+        <div class="checks">
+          <div><i>&#10003;</i> 这台设备保持登录</div><div><i>&#10003;</i> 其他设备全部退出</div>
+          <div><i>&#10003;</i> 新密码至少 6 位</div><div><i>&#10003;</i> 只保存加密后的哈希</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <div class="sec-kicker">DANGER ZONE</div>
+        <h3>重新开始</h3>
+        <button class="pill pill-ghost" id="btnClear" style="height:40px;padding:0 22px">清空曲库</button>
+      </div>
+      <div class="panel b">
+        <div class="sec-kicker">STORAGE</div>
+        <h3>存储与账号</h3>
+        <div class="checks" style="margin-bottom:20px">
+          <div><i>&#9679;</i> 当前存储：<span id="setStore">—</span></div>
+          <div><i>&#9679;</i> 曲库歌曲：<span id="setCount">0</span> 首</div>
+        </div>
+        <button class="pill pill-ghost" id="setLogout" style="height:40px;padding:0 22px">退出登录</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1049,6 +1102,32 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
   </div>
 </div>
 <input type="file" id="mixFile" accept="audio/*,.mp3,.m4a,.wav,.flac,.ogg" class="hidden">
+
+
+<div class="drawer" id="drawer">
+  <div class="drawer-bg" data-close-drawer></div>
+  <aside class="drawer-panel">
+    <div class="drawer-top">
+      <span class="logo-txt"><b>911DJ<i>.COM</i></b><span>MUSIC BEYOND LIMITS</span></span>
+      <button class="icon-round" data-close-drawer aria-label="关闭">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4 6.4 19 5 17.6 10.6 12 5 6.4 6.4 5z"/></svg>
+      </button>
+    </div>
+    <button class="dlink" data-page="home"><span class="ic">&#9834;</span>首页</button>
+    <button class="dlink" data-page="latest"><span class="ic">&#127911;</span>最新音乐</button>
+    <button class="dlink" data-page="charts"><span class="ic">&#128293;</span>热门榜单</button>
+    <button class="dlink" data-page="artists"><span class="ic">&#128100;</span>音乐人</button>
+    <button class="dlink" data-page="favorites"><span class="ic">&#9829;</span>我的收藏</button>
+    <button class="dlink" data-page="mix"><span class="ic">&#127925;</span>打碟台</button>
+    <div class="drawer-sep"></div>
+    <button class="dlink" data-page="about"><span class="ic">&#8505;</span>关于我们</button>
+    <button class="dlink" data-page="settings"><span class="ic">&#9881;</span>设置</button>
+    <div class="drawer-acts">
+      <button class="pill pill-blue" id="drawUpload" style="width:100%">上传 MP3</button>
+      <button class="pill pill-ghost" id="drawFolder" style="width:100%">上传文件夹</button>
+    </div>
+  </aside>
+</div>
 
 <div class="toast" id="toast"></div>
 <audio id="audio"></audio>
@@ -1417,7 +1496,7 @@ function emptyHTML(title, body, withBtn){
 }
 
 /* ------------------------------------------------------------- the router */
-const PAGE_TITLES = { home:'911DJ.COM', latest:'最新上架', charts:'热门榜单', artists:'音乐人', artist:'音乐人', favorites:'我的收藏', mix:'打碟台', about:'关于我们' };
+const PAGE_TITLES = { home:'911DJ.COM', latest:'最新上架', charts:'热门榜单', artists:'音乐人', artist:'音乐人', favorites:'我的收藏', mix:'打碟台', about:'关于我们', settings:'设置' };
 function go(page, arg){
   if(page === 'artist' && !arg) page = 'artists';
   state.page = page; if(page === 'artist') state.artist = arg;
@@ -1452,6 +1531,7 @@ function renderPage(){
   else if(p === 'favorites') renderFavorites();
   else if(p === 'mix') mixOpen();
   else if(p === 'about') renderAbout();
+  else if(p === 'settings') renderSettings();
   renderStats();
 }
 function renderStats(){
@@ -1547,6 +1627,11 @@ function renderFavorites(){
     : emptyHTML('还没有收藏', '点击任意歌曲卡片上的红心 &mdash;&mdash; 或播放时点播放条上的红心 &mdash;&mdash; 就会出现在这里。', !state.tracks.length);
 }
 function renderAbout(){ /* stats only */ }
+function renderSettings(){
+  $('#setStore').textContent = Store.mode === 'server' ? '服务器（云端）' : state.persist ? '本机浏览器' : '临时（关闭即清空）';
+  $('#setCount').textContent = state.tracks.length;
+  $('#setLogout').hidden = Store.mode !== 'server';
+}
 function updateStore(){
   $('#stStore').textContent = Store.mode === 'server' ? '已保存在服务器'
     : state.persist ? '已保存在此设备' : '未保存 —— 见 README';
@@ -1752,6 +1837,7 @@ $$('#pwCur, #pwNew, #pwNew2').forEach(el => el.addEventListener('keydown', e => 
   if(e.key === 'Enter'){ e.preventDefault(); $('#pwSave').click(); }
 }));
 
+$('#setLogout').onclick = () => $('#btnLogout').click();
 $('#btnLogout').onclick = async () => {
   if(!confirm('退出登录？')) return;
   await settled();
@@ -1760,6 +1846,21 @@ $('#btnLogout').onclick = async () => {
 };
 $('#btnAbout').onclick = () => go('about');
 $('#logo').onclick = () => go('home');
+const drawer = () => $('#drawer');
+function drawerOpen(v){
+  drawer().classList.toggle('open', v);
+  document.body.style.overflow = v ? 'hidden' : '';
+  if(v) $$('#drawer .dlink').forEach(b =>
+    b.classList.toggle('on', b.getAttribute('data-page') === state.page ||
+      (state.page === 'artist' && b.getAttribute('data-page') === 'artists')));
+}
+$('#burger').onclick = () => drawerOpen(true);
+document.addEventListener('click', e => {
+  if(e.target.closest('[data-close-drawer]')){ drawerOpen(false); return; }
+  if(e.target.closest('#drawer .dlink')) drawerOpen(false);
+});
+$('#drawUpload').onclick = () => { drawerOpen(false); $('#fileInput').click(); };
+$('#drawFolder').onclick = () => { drawerOpen(false); $('#dirInput').click(); };
 $('#navSearch').onclick = () => { go('home'); setTimeout(() => $('#search').focus(), 320); };
 $('#searchGo').onclick = e => { e.preventDefault(); renderPage(); };
 $('#search').addEventListener('input', renderPage);
@@ -2001,6 +2102,8 @@ audio.addEventListener('error', () => { if(audio.src) toast('无法播放该文�
 
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){
+    if(drawer().classList.contains('open')){ drawerOpen(false); return; }
+    if(!$('#picker').hidden){ $('#picker').hidden = true; return; }
     if(!$('#modal').hidden){ e.preventDefault(); closeRename(); return; }
     if(!$('#menu').hidden){ closeMenu(); return; }
     if(fullOpen()){ e.preventDefault(); closeFull(); return; }
