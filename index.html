@@ -2213,7 +2213,7 @@ function deckMake(id){
   const ch  = c.createGain(); ch.gain.value = 0.85;
   const xf  = c.createGain(); xf.gain.value = Math.cos(0.25 * Math.PI);
   low.connect(mid); mid.connect(hi); hi.connect(flt); flt.connect(ch); ch.connect(xf); xf.connect(MIX.master);
-  return { id, low, mid, hi, flt, ch, xf, buffer:null, src:null, peaks:null,
+  return { id, low, mid, hi, flt, ch, xf, buffer:null, src:null, peaks:null, bands:null,
            playing:false, offset:0, startedAt:0, rate:1, bpm:0, cue:0, name:'' };
 }
 const D = id => (id === 'a' ? MIX.a : MIX.b);
@@ -2263,6 +2263,47 @@ function peaksOf(buf, n){
   }
   return out;
 }
+/* ---- Frequency-coloured waveform, the way Rekordbox and Traktor draw it.
+   The track is re-rendered three times through low / band / high filters, then
+   each column takes its colour from which band dominates there: bass reds,
+   mids greens, highs blues. Rendering at 22 kHz keeps a 4 kHz highpass well
+   inside Nyquist while halving the work. ---- */
+async function bandsOf(buf, n){
+  const rate = 22050;
+  const len = Math.max(1, Math.ceil(buf.duration * rate));
+  const defs = [
+    { type:'lowpass',  freq:200  },
+    { type:'bandpass', freq:1200, q:0.6 },
+    { type:'highpass', freq:4000 }
+  ];
+  const out = [];
+  for(const d of defs){
+    const oc = new OfflineAudioContext(1, len, rate);
+    const src = oc.createBufferSource(); src.buffer = buf;
+    const f = oc.createBiquadFilter();
+    f.type = d.type; f.frequency.value = d.freq;
+    if(d.q) f.Q.value = d.q;
+    src.connect(f); f.connect(oc.destination); src.start();
+    const rendered = (await oc.startRendering()).getChannelData(0);
+    const step = Math.max(1, Math.floor(rendered.length / n)), col = new Float32Array(n);
+    for(let i = 0; i < n; i++){
+      let m = 0; const st = i * step, en = Math.min(rendered.length, st + step);
+      for(let j = st; j < en; j += 4){ const v = rendered[j] < 0 ? -rendered[j] : rendered[j]; if(v > m) m = v; }
+      col[i] = m;
+    }
+    out.push(col);
+  }
+  // Normalise each band against its own loudest column, so a quiet hi-hat still
+  // reads as treble instead of being swamped by the kick.
+  return out.map(col => {
+    let max = 0;
+    for(let i = 0; i < col.length; i++) if(col[i] > max) max = col[i];
+    if(max <= 0) return col;
+    const o = new Float32Array(col.length);
+    for(let i = 0; i < col.length; i++) o[i] = col[i] / max;
+    return o;
+  });
+}
 function bpmOf(buf){
   try {
     const ch = buf.getChannelData(0), sr = buf.sampleRate;
@@ -2300,6 +2341,10 @@ async function deckLoad(id, blobOrUrl, name){
     d.buffer = buf; d.offset = 0; d.cue = 0; d.name = name || '未命名';
     d.peaks = peaksOf(buf, 900);
     d.bpm = bpmOf(buf);
+    d.bands = null;
+    drawWave(id);
+    $('#nm' + U(id)).textContent = (name || '未命名') + ' · 分析中…';
+    try { d.bands = await bandsOf(buf, 900); } catch(e){ d.bands = null; }
     $('#nm' + U(id)).textContent = d.name;
     $('#bpm' + U(id)).textContent = d.bpm ? d.bpm.toFixed(1) : '--';
     drawWave(id); mixPaint();
@@ -2321,12 +2366,35 @@ function drawWave(id){
   if(!d.peaks) return;
   const n = d.peaks.length, w = cv.width / n, h = cv.height, mid = h / 2;
   const played = d.buffer ? deckPos(d) / d.buffer.duration : 0;
+  const B = d.bands;
+
   for(let i = 0; i < n; i++){
     const v = Math.pow(d.peaks[i], .75) * mid * 1.85;
-    g.fillStyle = (i / n) <= played
-      ? (id === 'a' ? 'rgba(63,182,255,.95)' : 'rgba(255,111,192,.95)')
-      : (id === 'a' ? 'rgba(63,182,255,.32)' : 'rgba(255,111,192,.32)');
+    const ahead = (i / n) > played;
+    if(B){
+      const lo = B[0][i], md = B[1][i], hi = B[2][i];
+      const top = Math.max(lo, md, hi, 1e-6);
+      const r = Math.round(255 * Math.pow(lo / top, .7));
+      const gg = Math.round(255 * Math.pow(md / top, .7));
+      const b = Math.round(255 * Math.pow(hi / top, .7));
+      g.fillStyle = 'rgba(' + r + ',' + gg + ',' + b + ',' + (ahead ? .42 : 1) + ')';
+    } else {
+      g.fillStyle = ahead
+        ? (id === 'a' ? 'rgba(63,182,255,.32)' : 'rgba(255,111,192,.32)')
+        : (id === 'a' ? 'rgba(63,182,255,.95)' : 'rgba(255,111,192,.95)');
+    }
     g.fillRect(i * w, mid - v, Math.max(1, w * .62), v * 2);
+  }
+
+  // Bar lines every 4 beats, so section lengths are countable like the pro tools
+  if(d.bpm && d.buffer){
+    const barSec = (60 / d.bpm) * 4;
+    g.fillStyle = 'rgba(255,255,255,.16)';
+    for(let t = 0, k = 0; t < d.buffer.duration; t += barSec, k++){
+      const x = (t / d.buffer.duration) * cv.width;
+      const tall = k % 8 === 0;
+      g.fillRect(x, tall ? 0 : h * .34, 1, tall ? h : h * .32);
+    }
   }
 }
 function mixPaint(){
